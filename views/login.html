@@ -75,7 +75,7 @@
           <h4 class="text-center">Sign In</h4>
           <p class="text-center">Enter Your Username and Password</p>
           <hr />
-          
+
           {{ if .error }}
           <div class="alert alert-danger ">
             {{ .error }}
@@ -90,6 +90,7 @@
               name="username"
               class="form-control"
               required
+              autocomplete="off"
             />
           </div>
           <div class="mb-3">
@@ -100,6 +101,7 @@
               name="password"
               class="form-control"
               required
+              autocomplete="off"
             />
           </div>
           <button type="submit" class="btn btn-success">Continue</button>
