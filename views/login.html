@@ -26,6 +26,7 @@
       .btn-success {
         background-color: #007bff;
         border-color: #007bff;
+        width: 100%;
       }
       .btn-success:hover {
         background-color: #0056b3;
@@ -74,6 +75,13 @@
           <h4 class="text-center">Sign In</h4>
           <p class="text-center">Enter Your Username and Password</p>
           <hr />
+          
+          {{ if .error }}
+          <div class="alert alert-danger ">
+            {{ .error }}
+          </div>
+          {{ end }}
+
           <div class="mb-3">
             <label for="username" class="form-label">Username:</label>
             <input
@@ -94,9 +102,7 @@
               required
             />
           </div>
-          <button type="submit" class="btn btn-success btn-block">
-            Continue
-          </button>
+          <button type="submit" class="btn btn-success">Continue</button>
           <hr />
           <p class="text-center">
             Don't have an account? <a href="/register">Sign Up</a>
