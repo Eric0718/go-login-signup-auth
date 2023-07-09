@@ -7,6 +7,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	"github.com/mhdianrush/go-login-signup-auth/config"
+	"github.com/mhdianrush/go-login-signup-auth/controllers"
 	"github.com/sirupsen/logrus"
 )
 
@@ -14,6 +15,9 @@ func main() {
 	config.ConnectDB()
 
 	r := mux.NewRouter()
+
+	r.HandleFunc("/", controllers.Index)
+	r.HandleFunc("/login", controllers.Login)
 
 	logger := logrus.New()
 
