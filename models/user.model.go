@@ -23,7 +23,7 @@ func NewUserModel() *UserModel {
 }
 
 func (u *UserModel) Find(user *entities.User, fieldName string, fieldValue string) error {
-	rows, err := u.DB.Query(`select * from users where `+fieldName+` = ? limit = 1`, fieldValue)
+	rows, err := u.DB.Query(`select * from users where `+fieldName+` = ? limit 1`, fieldValue)
 	if err != nil {
 		return err
 	}
@@ -34,7 +34,7 @@ func (u *UserModel) Find(user *entities.User, fieldName string, fieldValue strin
 			&user.Id,
 			&user.FullName,
 			&user.Email,
-			&user.Username, 
+			&user.Username,
 			&user.Password,
 		)
 	}
