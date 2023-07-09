@@ -17,11 +17,29 @@ type USerInput struct {
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {
-	temp, err := template.ParseFiles("views/index.html")
+	// checked session login of each client, if empty, will redirect to login page
+	session, err := config.Store.Get(r, config.SESSION_ID)
 	if err != nil {
 		panic(err)
 	}
-	temp.Execute(w, nil)
+
+	if len(session.Values) == 0 {
+		// empty session
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	} else {
+		if session.Values["LoggedIn"] != true {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+		} else {
+			data := map[string]any{
+				"full_name_of_user": session.Values["full_name"],
+			}
+			temp, err := template.ParseFiles("views/index.html")
+			if err != nil {
+				panic(err)
+			}
+			temp.Execute(w, data)
+		}
+	}
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
