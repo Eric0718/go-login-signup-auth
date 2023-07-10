@@ -12,7 +12,7 @@
       body {
         background-color: #f8f9fa;
       }
-      .container.mt-5 {
+      .container.mt-3 {
         max-width: 400px;
         margin-top: 5rem;
         background-color: #e6f2ff;
@@ -32,11 +32,18 @@
         background-color: #0056b3;
         border-color: #0056b3;
       }
-      .form-label {
-        font-weight: bold;
+      .form-floating {
+        margin-bottom: 1.5rem;
+      }
+      .form-control {
+        height: 45px;
       }
       .form-control:focus {
         box-shadow: none;
+      }
+      /* shadow for label text */
+      .form-floating label {
+        color: rgba(0, 0, 0, 0.6);
       }
     </style>
   </head>
@@ -69,7 +76,7 @@
     </nav>
     <!-- End of Navbar -->
 
-    <div class="container mt-5">
+    <div class="container mt-3">
       <div class="row justify-content-center">
         <form action="/login" method="post">
           <h4 class="text-center">Sign In</h4>
@@ -77,32 +84,32 @@
           <hr />
 
           {{ if .error }}
-          <div class="alert alert-danger ">
-            {{ .error }}
-          </div>
+          <div class="alert alert-danger">{{ .error }}</div>
           {{ end }}
 
-          <div class="mb-3">
-            <label for="username" class="form-label">Username:</label>
+          <div class="form-floating">
             <input
               type="text"
               id="username"
               name="username"
               class="form-control"
+              placeholder="Username"
               required
               autocomplete="off"
             />
+            <label for="username">Username</label>
           </div>
-          <div class="mb-3">
-            <label for="password" class="form-label">Password:</label>
+          <div class="form-floating">
             <input
               type="password"
               id="password"
               name="password"
               class="form-control"
+              placeholder="Password"
               required
               autocomplete="off"
             />
+            <label for="password">Password</label>
           </div>
           <button type="submit" class="btn btn-success">CONTINUE</button>
           <hr />
