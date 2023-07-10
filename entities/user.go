@@ -1,7 +1,7 @@
 package entities
 
 type User struct {
-	Id              int64  `validate:"required" json:"id"`
+	Id              int64  `json:"id"`
 	FullName        string `validate:"required" label:"Full Name" json:"full_name"`
 	Email           string `validate:"required,email,isunique=users-email" json:"email"`
 	Username        string `validate:"required,gte=3,isunique=users-username" json:"username"`
