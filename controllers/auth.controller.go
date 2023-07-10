@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	"reflect"
+	"strings"
 
 	"github.com/go-playground/locales/en"
 	ut "github.com/go-playground/universal-translator"
@@ -167,6 +168,29 @@ func Register(w http.ResponseWriter, r *http.Request) {
 			return t
 		})
 
+		// every user can't have a similar email when make a registration
+		validate.RegisterValidation("isunique", func(fl validator.FieldLevel) bool {
+			params := fl.Param()
+			split_params := strings.Split(params, "-")
+
+			tableName := split_params[0]
+			// email is index 0
+			fieldName := split_params[1]
+			// field Email is index 1
+
+			fieldValue := fl.Field().String()
+			// fieldValue is used to pooling all the input user
+
+			return checkIsUnique(tableName, fieldName, fieldValue)
+		})
+		// custome message of the similar email in db
+		validate.RegisterTranslation("isunique", trans, func(ut ut.Translator) error {
+			return ut.Add("isunique", "{0} already used", true)
+		}, func(ut ut.Translator, fe validator.FieldError) string {
+			t, _ := ut.T("isunique", fe.Field())
+			return t
+		})
+
 		vErrors := validate.Struct(user)
 
 		var errMessages = make(map[string]any)
@@ -175,11 +199,13 @@ func Register(w http.ResponseWriter, r *http.Request) {
 			for _, e := range vErrors.(validator.ValidationErrors) {
 				errMessages[e.StructField()] = e.Translate(trans)
 			}
+
 			data := map[string]any{
 				"validation": errMessages,
 				// so that the filled text not lost if all of the input text doesn't exist
 				"user": user,
 			}
+
 			temp, err := template.ParseFiles("views/register.html")
 			if err != nil {
 				panic(err)
@@ -187,4 +213,25 @@ func Register(w http.ResponseWriter, r *http.Request) {
 			temp.Execute(w, data)
 		}
 	}
+}
+
+func checkIsUnique(tableName string, fieldName string, fieldValue string) bool {
+	db, err := config.ConnectDB()
+	if err != nil {
+		panic(err)
+	}
+
+	row, err := db.Query(`select `+fieldName+` from `+tableName+` where `+fieldName+` = ?`, fieldValue)
+	if err != nil {
+		panic(err)
+	}
+
+	defer row.Close()
+
+	var result string
+	for row.Next() {
+		row.Scan(&result)
+	}
+
+	return result != fieldValue
 }
