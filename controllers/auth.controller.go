@@ -4,15 +4,10 @@ import (
 	"errors"
 	"html/template"
 	"net/http"
-	"reflect"
-	"strings"
 
-	"github.com/go-playground/locales/en"
-	ut "github.com/go-playground/universal-translator"
-	"github.com/go-playground/validator/v10"
-	en_translation "github.com/go-playground/validator/v10/translations/en"
 	"github.com/mhdianrush/go-login-signup-auth/config"
 	"github.com/mhdianrush/go-login-signup-auth/entities"
+	"github.com/mhdianrush/go-login-signup-auth/libraries"
 	"github.com/mhdianrush/go-login-signup-auth/models"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -145,63 +140,13 @@ func Register(w http.ResponseWriter, r *http.Request) {
 			Password:        r.FormValue("password"),
 			ConfirmPassword: r.FormValue("confirm_password"),
 		}
+
 		// validation with validator package
-		translator := en.New()
-		uni := ut.New(translator, translator)
+		var errorMessages = libraries.NewValidation().Struct(user)
 
-		trans, _ := uni.GetTranslator("en")
-
-		validate := validator.New()
-		en_translation.RegisterDefaultTranslations(validate, trans)
-
-		// change default label tag
-		validate.RegisterTagNameFunc(func(field reflect.StructField) string {
-			labelName := field.Tag.Get("label")
-			return labelName
-		})
-
-		// make a custom message validation
-		validate.RegisterTranslation("required", trans, func(ut ut.Translator) error {
-			return ut.Add("required", "{0} can't be empty", true)
-		}, func(ut ut.Translator, fe validator.FieldError) string {
-			t, _ := ut.T("required", fe.Field())
-			return t
-		})
-
-		// every user can't have a similar email when make a registration
-		validate.RegisterValidation("isunique", func(fl validator.FieldLevel) bool {
-			params := fl.Param()
-			split_params := strings.Split(params, "-")
-
-			tableName := split_params[0]
-			// email is index 0
-			fieldName := split_params[1]
-			// field Email is index 1
-
-			fieldValue := fl.Field().String()
-			// fieldValue is used to pooling all the input user
-
-			return checkIsUnique(tableName, fieldName, fieldValue)
-		})
-		// custome message of the similar email in db
-		validate.RegisterTranslation("isunique", trans, func(ut ut.Translator) error {
-			return ut.Add("isunique", "{0} already used", true)
-		}, func(ut ut.Translator, fe validator.FieldError) string {
-			t, _ := ut.T("isunique", fe.Field())
-			return t
-		})
-
-		vErrors := validate.Struct(user)
-
-		var errMessages = make(map[string]any)
-
-		if vErrors != nil {
-			for _, e := range vErrors.(validator.ValidationErrors) {
-				errMessages[e.StructField()] = e.Translate(trans)
-			}
-
+		if errorMessages != nil {
 			data := map[string]any{
-				"validation": errMessages,
+				"validation": errorMessages,
 				// so that the filled text not lost if all of the input text doesn't exist
 				"user": user,
 			}
@@ -211,27 +156,22 @@ func Register(w http.ResponseWriter, r *http.Request) {
 				panic(err)
 			}
 			temp.Execute(w, data)
+		} else {
+			// hash password
+			hashPassword, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+			user.Password = string(hashPassword)
+
+			// insert to db
+			_, err := models.NewUserModel().Create(user)
+			if err != nil {
+				panic(err)
+			}
+
+			data := map[string]any{
+				"message": "Registration Successfully",
+			}
+			temp, _ := template.ParseFiles("views/register.html")
+			temp.Execute(w, data)
 		}
 	}
-}
-
-func checkIsUnique(tableName string, fieldName string, fieldValue string) bool {
-	db, err := config.ConnectDB()
-	if err != nil {
-		panic(err)
-	}
-
-	row, err := db.Query(`select `+fieldName+` from `+tableName+` where `+fieldName+` = ?`, fieldValue)
-	if err != nil {
-		panic(err)
-	}
-
-	defer row.Close()
-
-	var result string
-	for row.Next() {
-		row.Scan(&result)
-	}
-
-	return result != fieldValue
 }
