@@ -2,7 +2,6 @@ package libraries
 
 import (
 	"database/sql"
-	"fmt"
 	"reflect"
 	"strings"
 
@@ -87,8 +86,6 @@ func (v *Validation) Struct(s any) any {
 			vErrors[e.StructField()] = e.Translate(trans)
 		}
 	}
-
-	fmt.Println(vErrors)
 
 	if len(vErrors) > 0 {
 		return vErrors
