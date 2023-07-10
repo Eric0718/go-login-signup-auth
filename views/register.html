@@ -112,6 +112,7 @@
               name="full_name"
               class="form-control {{ if .validation.FullName }} is-invalid {{ end }}"
               placeholder="Full Name"
+              value="{{ .user.FullName }}"
             />
             <div class="invalid-feedback">{{ .validation.FullName }}</div>
             <label for="full_name" class="form-label">Full Name</label>
@@ -124,6 +125,7 @@
               name="email"
               class="form-control {{ if .validation.Email }} is-invalid {{ end }}"
               placeholder="Email"
+              value="{{ .user.Email }}"
             />
             <div class="invalid-feedback">{{ .validation.Email }}</div>
             <label for="email" class="form-label">Email</label>
@@ -136,6 +138,7 @@
               name="username"
               class="form-control {{ if .validation.Username }} is-invalid {{ end }}"
               placeholder="Username"
+              value="{{ .user.Username }}"
             />
             <div class="invalid-feedback">{{ .validation.Username }}</div>
             <label for="username" class="form-label">Username</label>
@@ -148,6 +151,7 @@
               name="password"
               class="form-control {{ if .validation.Password }} is-invalid {{ end }}"
               placeholder="Password"
+              value="{{ .user.Password }}"
             />
             <div class="invalid-feedback">{{ .validation.Password }}</div>
             <label for="password" class="form-label">Password</label>
@@ -160,6 +164,7 @@
               name="confirm_password"
               class="form-control {{ if .validation.ConfirmPassword }} is-invalid {{ end }}"
               placeholder="Confirm Password"
+              value="{{ .user.ConfirmPassword }}"
             />
             <div class="invalid-feedback">
               {{ .validation.ConfirmPassword }}
