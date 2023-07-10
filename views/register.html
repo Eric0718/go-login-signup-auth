@@ -103,10 +103,11 @@
               type="text"
               id="full_name"
               name="full_name"
-              class="form-control"
+              class="form-control {{ if .validation.FullName }} is-invalid {{ end }}"
               placeholder="Full Name"
               required
             />
+            <div class="invalid-feedback">{{ .validation.FullName }}</div>
             <label for="full_name" class="form-label">Full Name</label>
           </div>
 
@@ -115,10 +116,11 @@
               type="text"
               id="email"
               name="email"
-              class="form-control"
+              class="form-control {{ if .validation.Email }} is-invalid {{ end }}"
               placeholder="Email"
               required
             />
+            <div class="invalid-feedback">{{ .validation.Email }}</div>
             <label for="email" class="form-label">Email</label>
           </div>
 
@@ -127,10 +129,11 @@
               type="text"
               id="username"
               name="username"
-              class="form-control"
+              class="form-control {{ if .validation.Username }} is-invalid {{ end }}"
               placeholder="Username"
               required
             />
+            <div class="invalid-feedback">{{ .validation.Username }}</div>
             <label for="username" class="form-label">Username</label>
           </div>
 
@@ -139,10 +142,11 @@
               type="password"
               id="password"
               name="password"
-              class="form-control"
+              class="form-control {{ if .validation.Password }} is-invalid {{ end }}"
               placeholder="Password"
               required
             />
+            <div class="invalid-feedback">{{ .validation.Password }}</div>
             <label for="password" class="form-label">Password</label>
           </div>
 
@@ -151,10 +155,13 @@
               type="password"
               id="confirm_password"
               name="confirm_password"
-              class="form-control"
+              class="form-control {{ if .validation.ConfirmPassword }} is-invalid {{ end }}"
               placeholder="Confirm Password"
               required
             />
+            <div class="invalid-feedback">
+              {{ .validation.ConfirmPassword }}
+            </div>
             <label for="confirm_password" class="form-label"
               >Confirm Password</label
             >
