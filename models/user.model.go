@@ -40,3 +40,18 @@ func (u *UserModel) Find(user *entities.User, fieldName string, fieldValue strin
 	}
 	return nil
 }
+
+func (u *UserModel) Create(user entities.User) (int64, error) {
+	result, err := u.DB.Exec(
+		`insert into users (full_name, email, username, password) values (?,?,?,?)`,
+		user.FullName, user.Email, user.Username, user.Password,
+	)
+	if err != nil {
+		return 0, err
+	}
+	lastInsertId, err := result.LastInsertId()
+	if err != nil {
+		panic(err)
+	}
+	return lastInsertId, nil
+}
