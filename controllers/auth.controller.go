@@ -13,8 +13,8 @@ import (
 )
 
 type USerInput struct {
-	Username string
-	Password string
+	Username string `validate:"required"`
+	Password string `validate:"required"`
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {
@@ -59,51 +59,65 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			Password: r.FormValue("password"),
 		}
 
-		var user entities.User
-		err := models.NewUserModel().Find(&user, "username", userInput.Username)
-		if err != nil {
-			panic(err)
-		}
+		// validation
+		var errorMessages = libraries.NewValidation().Struct(userInput)
 
-		var message error
-		// if login failed
-
-		if user.Username == "" {
-			// nothing match data with database
-			message = errors.New("username or password doesn't match")
-		} else {
-			// exist username data in database
-			// compare password userInput with password in database with hashing
-			errPassword := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(userInput.Password))
-			if errPassword != nil {
-				// password not match
-				message = errors.New("username or password doesn't match")
-			}
-		}
-		// if failed login
-		if message != nil {
+		if errorMessages != nil {
 			data := map[string]any{
-				"error": message,
+				"validation": errorMessages,
 			}
+
 			temp, err := template.ParseFiles("views/login.html")
 			if err != nil {
 				panic(err)
 			}
 			temp.Execute(w, data)
 		} else {
-			// if username and password correct, set session
-			session, _ := config.Store.Get(r, config.SESSION_ID)
-			session.Values["LoggedIn"] = true
-			session.Values["email"] = user.Email
-			session.Values["username"] = user.Username
-			session.Values["full_name"] = user.FullName
+			var user entities.User
+			err := models.NewUserModel().Find(&user, "username", userInput.Username)
+			if err != nil {
+				panic(err)
+			}
 
-			session.Save(r, w)
+			var message error
+			// if login failed
 
-			http.Redirect(w, r, "/", http.StatusSeeOther)
+			if user.Username == "" {
+				// nothing match data with database
+				message = errors.New("username or password doesn't match")
+			} else {
+				// exist username data in database
+				// compare password userInput with password in database with hashing
+				errPassword := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(userInput.Password))
+				if errPassword != nil {
+					// password not match
+					message = errors.New("username or password doesn't match")
+				}
+			}
+			// if failed login
+			if message != nil {
+				data := map[string]any{
+					"error": message,
+				}
+				temp, err := template.ParseFiles("views/login.html")
+				if err != nil {
+					panic(err)
+				}
+				temp.Execute(w, data)
+			} else {
+				// if username and password correct, set session
+				session, _ := config.Store.Get(r, config.SESSION_ID)
+				session.Values["LoggedIn"] = true
+				session.Values["email"] = user.Email
+				session.Values["username"] = user.Username
+				session.Values["full_name"] = user.FullName
+
+				session.Save(r, w)
+
+				http.Redirect(w, r, "/", http.StatusSeeOther)
+			}
 		}
 	}
-
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {
