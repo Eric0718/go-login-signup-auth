@@ -19,6 +19,7 @@ func main() {
 	r.HandleFunc("/", controllers.Index)
 	r.HandleFunc("/login", controllers.Login)
 	r.HandleFunc("/logout", controllers.Logout)
+	r.HandleFunc("/register", controllers.Register)
 
 	logger := logrus.New()
 
