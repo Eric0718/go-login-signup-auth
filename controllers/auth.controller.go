@@ -159,6 +159,14 @@ func Register(w http.ResponseWriter, r *http.Request) {
 			return labelName
 		})
 
+		// make a custom message validation
+		validate.RegisterTranslation("required", trans, func(ut ut.Translator) error {
+			return ut.Add("required", "{0} can't be empty", true)
+		}, func(ut ut.Translator, fe validator.FieldError) string {
+			t, _ := ut.T("required", fe.Field())
+			return t
+		})
+
 		vErrors := validate.Struct(user)
 
 		var errMessages = make(map[string]any)
@@ -169,6 +177,8 @@ func Register(w http.ResponseWriter, r *http.Request) {
 			}
 			data := map[string]any{
 				"validation": errMessages,
+				// so that the filled text not lost if all of the input text doesn't exist
+				"user": user,
 			}
 			temp, err := template.ParseFiles("views/register.html")
 			if err != nil {
