@@ -5,6 +5,10 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/go-playground/locales/en"
+	ut "github.com/go-playground/universal-translator"
+	"github.com/go-playground/validator/v10"
+	en_translation "github.com/go-playground/validator/v10/translations/en"
 	"github.com/mhdianrush/go-login-signup-auth/config"
 	"github.com/mhdianrush/go-login-signup-auth/entities"
 	"github.com/mhdianrush/go-login-signup-auth/models"
@@ -132,7 +136,38 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		// manual validation
 		// helper.RegistrationManualValidation(w, r)
 
+		user := entities.User{
+			FullName:        r.FormValue("full_name"),
+			Email:           r.FormValue("email"),
+			Username:        r.FormValue("username"),
+			Password:        r.FormValue("password"),
+			ConfirmPassword: r.FormValue("confirm_password"),
+		}
 		// validation with validator package
-		
+		translator := en.New()
+		uni := ut.New(translator, translator)
+
+		trans, _ := uni.GetTranslator("en")
+
+		validate := validator.New()
+		en_translation.RegisterDefaultTranslations(validate, trans)
+
+		vErrors := validate.Struct(user)
+
+		var errMessages = make(map[string]any)
+
+		if vErrors != nil {
+			for _, e := range vErrors.(validator.ValidationErrors) {
+				errMessages[e.StructField()] = e.Translate(trans)
+			}
+			data := map[string]any{
+				"validation": errMessages,
+			}
+			temp, err := template.ParseFiles("views/register.html")
+			if err != nil {
+				panic(err)
+			}
+			temp.Execute(w, data)
+		}
 	}
 }
