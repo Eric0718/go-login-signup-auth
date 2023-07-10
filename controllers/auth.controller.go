@@ -4,6 +4,7 @@ import (
 	"errors"
 	"html/template"
 	"net/http"
+	"reflect"
 
 	"github.com/go-playground/locales/en"
 	ut "github.com/go-playground/universal-translator"
@@ -151,6 +152,12 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 		validate := validator.New()
 		en_translation.RegisterDefaultTranslations(validate, trans)
+
+		// change default label tag
+		validate.RegisterTagNameFunc(func(field reflect.StructField) string {
+			labelName := field.Tag.Get("label")
+			return labelName
+		})
 
 		vErrors := validate.Struct(user)
 
